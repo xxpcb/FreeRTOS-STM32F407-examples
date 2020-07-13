@@ -226,19 +226,28 @@ void print_task(void *pvParameters)
 			{				
 				//是有效的指令，继续判断后续参数
 				char* para[4]={0};//限定最多接收4个参数
-				para[0] = strtok(paras, " ");
-				int j= 1;
-				while(paras != NULL)//这里有点小问题，不可以提前结束
+//				para[0] = strtok(paras, " ");
+//				int j= 1;
+//				while(paras != NULL)//这里有点小问题，不可以提前结束
+//				{
+//					para[j++] = strtok(NULL, " ");
+//					if(j==4)
+//						break;
+//				}
+				char *str=paras;
+				int j= 0;
+				while((para[j]=strtok(str," "))!= NULL)//这里有点小问题，不可以提前结束
 				{
-					para[j++] = strtok(NULL, " ");
+					j++;
+					str=NULL;
 					if(j==4)
 						break;
 				}
-//				printf("paras nums:%d\r\n",j);
-//				printf("para[0]:%s\r\n", para[0]);
-//				printf("para[1]:%s\r\n", para[1]);
-//				printf("para[2]:%s\r\n", para[2]);
-//				printf("para[3]:%s\r\n", para[3]);
+				printf("paras nums:%d\r\n",j);
+				printf("para[0]:%s\r\n", para[0]);
+				printf("para[1]:%s\r\n", para[1]);
+				printf("para[2]:%s\r\n", para[2]);
+				printf("para[3]:%s\r\n", para[3]);
 				
 				//执行对应的函数
 				struct_dostr1[i].fun(para);
