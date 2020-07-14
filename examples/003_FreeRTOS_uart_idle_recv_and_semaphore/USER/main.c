@@ -165,15 +165,15 @@ void print_task(void *pvParameters)
 	
 	int size=50;
 	uint8_t buf[64];//最多只取前64个数据
-
-	//清空本地接收数组
-	memset(buf,0,size);
 	
 	while(1)
 	{
 		err=xSemaphoreTake(uartSemaphore,10);	//获取信号量
 		if(err==pdTRUE)							//获取信号量成功
 		{  
+			//清空本地接收数组
+			memset(buf,0,size);
+			
 			//printf("%s",Data);
 			if(rx_cnt < size)//收到的数据长度在size范围内
 			{
@@ -194,7 +194,7 @@ void print_task(void *pvParameters)
 		if(count>0)
 		{
 			count=0;
-			printf("receive:%s",buf);
+			printf("receive:%s\r\n",buf);
 			
 			//------------------------------------------------------------------------------
 			//这里可以继续对buf进行分析和处理，比如根据buf的不同内容执行不同的小任务
@@ -202,13 +202,13 @@ void print_task(void *pvParameters)
 			//先判断指令名称
 			char *cmd;//表示命令
 			char *paras;//表示命令后的参数
-			cmd = strtok_r((char*)buf, " ", &paras);//这里有点小问题，不带参数的命令，后面需要一个空格
+			cmd = strtok_r((char*)buf, " ", &paras);//这里有点小问题，不带参数的命令，后面需要一个空格（已解决，见下面第6行）
 			
 			char *ret;
 			int i;
 			for (i = 0; i < N;i++)
 			{
-				ret = strstr(struct_dostr1[i].name, cmd);
+				ret = strstr(cmd, struct_dostr1[i].name);//这里之前将cmd放在后面了，会出现问题！
 				if(ret!=NULL)
 				{
 //					printf("find cmd in funname[%d]\r\n", i);
@@ -228,26 +228,25 @@ void print_task(void *pvParameters)
 				char* para[4]={0};//限定最多接收4个参数
 //				para[0] = strtok(paras, " ");
 //				int j= 1;
-//				while(paras != NULL)//这里有点小问题，不可以提前结束
+//				while(paras != NULL)//这里有点小问题，不可以提前结束（已解决）
 //				{
 //					para[j++] = strtok(NULL, " ");
 //					if(j==4)
 //						break;
 //				}
-				char *str=paras;
 				int j= 0;
-				while((para[j]=strtok(str," "))!= NULL)//这里有点小问题，不可以提前结束
+				while((para[j]=strtok(paras," "))!= NULL)//改成这样就可以了
 				{
 					j++;
-					str=NULL;
+					paras=NULL;
 					if(j==4)
 						break;
 				}
 				printf("paras nums:%d\r\n",j);
-				printf("para[0]:%s\r\n", para[0]);
-				printf("para[1]:%s\r\n", para[1]);
-				printf("para[2]:%s\r\n", para[2]);
-				printf("para[3]:%s\r\n", para[3]);
+				if(j>0)printf("para[0]:%s\r\n", para[0]);
+				if(j>1)printf("para[1]:%s\r\n", para[1]);
+				if(j>2)printf("para[2]:%s\r\n", para[2]);
+				if(j>3)printf("para[3]:%s\r\n", para[3]);
 				
 				//执行对应的函数
 				struct_dostr1[i].fun(para);
